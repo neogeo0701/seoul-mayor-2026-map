@@ -358,7 +358,7 @@
   </div>
   <div class="iv-go">
     <button id="introGo">지도 보기 →</button>
-    <span class="ig-hint">아무 키나 누르거나 화면을 클릭하면 시작 · 8초 후 자동 진입</span>
+    <span class="ig-hint">버튼을 눌러야 지도로 이동합니다</span>
   </div>
 </div>
 
@@ -880,27 +880,19 @@ async function boot(){
     catch(e){ console.error(e); fallbackSVG("⚠ TMAP 초기화 실패 — 콘솔 확인. 아래는 SVG 미리보기."); }
   }
 }
-// 인트로 VS 카드: 클릭/키 입력/8초 자동 진입, 세션 내 재방문 시 스킵
+// 인트로 VS 카드: 오직 '지도 보기' 버튼으로만 진입 (자동 진입·임의 클릭/키 진입 없음), 세션 내 재방문 시 스킵
 (function(){
   const intro=document.getElementById("intro"); if(!intro) return;
   try{ if(sessionStorage.getItem("introSeen")){ intro.classList.add("done"); return; } }catch(e){}
-  let done=false, timer=null;
+  let done=false;
   function dismiss(){
     if(done) return; done=true;
     try{ sessionStorage.setItem("introSeen","1"); }catch(e){}
-    document.removeEventListener("keydown",onKey);
-    intro.removeEventListener("click",onClick);
-    if(timer) clearTimeout(timer);
     intro.style.transition="opacity .4s ease"; intro.style.opacity="0";
     setTimeout(()=>intro.classList.add("done"), 420);
   }
-  function onKey(){ dismiss(); }
-  function onClick(){ dismiss(); }
   const goBtn=document.getElementById("introGo");
-  if(goBtn) goBtn.addEventListener("click",e=>{ e.stopPropagation(); dismiss(); });
-  intro.addEventListener("click",onClick);
-  document.addEventListener("keydown",onKey);
-  timer=setTimeout(dismiss, 8000); // 방치 대비 자동 진입
+  if(goBtn) goBtn.addEventListener("click",dismiss);
 })();
 
 boot();
