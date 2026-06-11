@@ -2,9 +2,13 @@
 *.docx
 # 백업/스캐폴딩
 index_stable.html
+index_stable2.html
 shot.js
 hero.js
 verify.js
+cap.js
+regress.js
+liveshot.js
 # 의존성/패키지
 node_modules/
 package.json

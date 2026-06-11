@@ -31,8 +31,13 @@
   :root{
     --panel-bg: rgba(255,255,255,0.78);
     --ink:#1c2230; --muted:#5b6577; --line:#dfe3ea;
-    --oh:#c0563c; --jung:#3f7bb0;
+    --ppp:#E61E2B; --dem:#152484;   /* 정당 고유색: 국민의힘 / 더불어민주당 */
+    --oh:#E61E2B; --jung:#152484;   /* 후보 식별색 = 정당색 (지도 폴리곤은 별도 톤다운 팔레트) */
   }
+  /* 정당명 뱃지 (로고 미사용, 컬러칩+텍스트) */
+  .pbadge{display:inline-flex;align-items:center;font-size:9.5px;font-weight:800;color:#fff;
+    padding:1px 6px;border-radius:5px;letter-spacing:-.2px;line-height:1.55;white-space:nowrap}
+  .pbadge.ppp{background:var(--ppp)}.pbadge.dem{background:var(--dem)}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;font-family:"Pretendard","Pretendard Variable","Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:#eef1f5;-webkit-font-smoothing:antialiased}
   #app{display:flex;flex-direction:column;height:100%}
@@ -51,17 +56,36 @@
   .statcard .sc-top{display:flex;align-items:center;gap:7px;font-size:11px;color:#9cafca;font-weight:700}
   .statcard .sc-main{font-size:17px;font-weight:800;letter-spacing:-.4px;color:#fff}
   .statcard .sc-sub{font-size:11px;color:#9cafca;font-weight:500}
-  .statcard.win{border-color:rgba(216,105,78,.55);background:rgba(216,105,78,.14)}
-  .badge-win{font-size:9.5px;font-weight:800;color:#10182b;background:#ffce9e;border-radius:5px;padding:1px 6px}
+  .statcard.win{border-color:rgba(230,30,43,.5);background:rgba(230,30,43,.13)}
+  .badge-win{font-size:9.5px;font-weight:800;color:#fff;background:var(--ppp);border-radius:5px;padding:1px 6px}
   .gap-pill{display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:6px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.22)}
   .gap-pill .gp-k{font-size:10px;color:#9cafca;font-weight:700}
   .gap-pill .gp-v{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
   .gap-pill .gp-s{font-size:10px;color:#9cafca}
   .dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.16)}
-  .dot.oh{background:#d8694e}.dot.jung{background:#4f8bc0}
+  .dot.oh{background:var(--ppp)}.dot.jung{background:var(--dem)}
   .oh{color:var(--oh)}.jung{color:var(--jung)}
-  @media(max-width:860px){ header .sub{display:none} .statcard{min-width:0;padding:7px 10px} header h1{font-size:16px} }
+
+  /* 헤더 구 검색 인풋 */
+  .head-search{flex:none;position:relative}
+  .head-search input{width:152px;padding:7px 12px 7px 30px;border-radius:11px;font-family:inherit;font-size:12.5px;
+    color:#fff;background:rgba(255,255,255,.1) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238ea2c0' stroke-width='2.4'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") no-repeat 9px center;
+    border:1px solid rgba(255,255,255,.18);outline:none;transition:all .15s}
+  .head-search input::placeholder{color:#8ea2c0}
+  .head-search input:focus{border-color:rgba(255,255,255,.42);background-color:rgba(255,255,255,.17);width:172px}
+
+  @media(max-width:860px){ header .sub{display:none} .statcard{min-width:0;padding:7px 10px} header h1{font-size:16px} .head-search input{width:120px} }
+  @media(max-width:480px){
+    header{flex-wrap:wrap;gap:9px;padding:10px 13px}
+    header h1{font-size:15px}
+    .head-search{order:3;flex:1 1 100%} .head-search input{width:100%}
+    header .stats{order:2;flex:1 1 100%;justify-content:space-between}
+    .statcard{flex:1;min-width:0;padding:6px 8px} .gap-pill{padding:6px 8px}
+    #panel{width:100%;max-width:100%}
+    #legend{width:calc(100% - 28px);right:14px}
+    #rank{bottom:auto;top:auto}
+  }
 
   #main{position:relative;flex:1;min-height:0}
   #map{position:absolute;inset:0}
@@ -103,9 +127,9 @@
     box-shadow:0 6px 20px rgba(0,0,0,.25)}
   #tip .t-name{font-weight:700;font-size:13px;margin-bottom:5px}
   #tip .t-row{display:flex;justify-content:space-between;gap:14px}
-  #tip .t-oh{color:#ffb4a3}#tip .t-jung{color:#a9cdf0}
+  #tip .t-oh{color:#ff7b80}#tip .t-jung{color:#93a9ec}
   #tip .t-gap{margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.18);font-size:11.5px}
-  #tip .win-oh{color:#ffb4a3;font-weight:700}#tip .win-jung{color:#a9cdf0;font-weight:700}
+  #tip .win-oh{color:#ff7b80;font-weight:700}#tip .win-jung{color:#93a9ec;font-weight:700}
 
   .credit{position:absolute;left:14px;bottom:14px;font-size:10.5px;color:var(--muted);
     background:rgba(255,255,255,.8);padding:3px 8px;border-radius:7px;z-index:6}
@@ -138,8 +162,20 @@
   .p-cand .pc-val{font-weight:800;font-size:13px}
   .p-cand .pc-bar{height:13px;border-radius:7px;background:rgba(20,28,44,.07);overflow:hidden}
   .p-cand .pc-fill{height:100%;border-radius:7px;transition:width .5s cubic-bezier(.22,.61,.36,1)}
-  .fill-oh{background:linear-gradient(90deg,#d8694e,#bb4c30)}
-  .fill-jung{background:linear-gradient(90deg,#5f99c9,#3f7bb0)}
+  .fill-oh{background:linear-gradient(90deg,#f0454f,#E61E2B)}
+  .fill-jung{background:linear-gradient(90deg,#2f40a8,#152484)}
+
+  /* 패널 컨텍스트 노트 ("왜 이런 결과?") */
+  #panel .p-note{margin-top:16px;padding:13px 14px;border-radius:12px;background:rgba(20,28,44,.045);
+    border-left:3px solid var(--ink)}
+  #panel .p-note .pn-h{font-size:11px;font-weight:800;color:var(--ink);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+  #panel .p-note .pn-b{font-size:12px;line-height:1.62;color:#36425a}
+  #panel .p-note .pn-src{display:block;margin-top:6px;font-size:10px;color:var(--muted);font-weight:600}
+  #panel .p-note.hidden{display:none}
+
+  /* 분류법/보기 토글 캡션 */
+  #controls .seg+.ttl{margin-top:11px}
+  #controls .cap{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.45;max-width:188px}
   #panel .p-gap{margin-top:20px;padding:13px 15px;border-radius:12px;background:rgba(20,28,44,.05);
     display:flex;flex-direction:column;gap:3px}
   #panel .p-gap .pg-k{font-size:11px;color:var(--muted);font-weight:700}
@@ -185,10 +221,14 @@
       <h1>2026 서울시장 선거, 누가 어디서 이겼나</h1>
       <div class="sub">제9회 지방선거 자치구별 단계구분도 · 출처 중앙선거관리위원회</div>
     </div>
+    <div class="head-search">
+      <input id="distSearch" list="distList" placeholder="구 검색…" autocomplete="off" aria-label="자치구 검색" />
+      <datalist id="distList"></datalist>
+    </div>
     <div class="stats" id="stats">
-      <div class="statcard win" id="sc-oh"><div class="sc-top"><span class="dot oh"></span>오세훈 <span class="badge-win">당선</span></div><div class="sc-main">—</div><div class="sc-sub">—</div></div>
+      <div class="statcard win" id="sc-oh"><div class="sc-top"><span class="dot oh"></span>오세훈 <span class="pbadge ppp">국민의힘</span> <span class="badge-win">당선</span></div><div class="sc-main">—</div><div class="sc-sub">—</div></div>
       <div class="gap-pill" id="sc-gap"><div class="gp-k">격차</div><div class="gp-v">—</div><div class="gp-s">—</div></div>
-      <div class="statcard" id="sc-jung"><div class="sc-top"><span class="dot jung"></span>정원오</div><div class="sc-main">—</div><div class="sc-sub">—</div></div>
+      <div class="statcard" id="sc-jung"><div class="sc-top"><span class="dot jung"></span>정원오 <span class="pbadge dem">더불어민주당</span></div><div class="sc-main">—</div><div class="sc-sub">—</div></div>
     </div>
   </header>
 
@@ -199,7 +239,13 @@
     <div id="banner"></div>
 
     <div id="controls" class="glass">
-      <div class="ttl">분류법 (6단계)</div>
+      <div class="ttl">보기 모드</div>
+      <div class="seg" id="viewSeg">
+        <button data-v="margin" class="active">격차</button>
+        <button data-v="winner">승자</button>
+      </div>
+      <div class="cap" id="viewCap"></div>
+      <div class="ttl" id="methodTtl">분류법 (6단계)</div>
       <div class="seg" id="seg">
         <button data-m="jenks" class="active">자연분류</button>
         <button data-m="equal">등간격</button>
@@ -213,10 +259,10 @@
     </div>
 
     <div id="legend" class="glass">
-      <div class="ttl">오세훈 ↔ 정원오 격차 (%p)</div>
+      <div class="ttl" id="legTtl">오세훈 ↔ 정원오 격차 (%p)</div>
       <div class="cap" id="legcap">정원오 우세(파랑) · 오세훈 우세(주황) · 진할수록 강함</div>
       <div id="legrows"></div>
-      <div class="lg-ends"><span>← 정원오 우세</span><span>오세훈 우세 →</span></div>
+      <div class="lg-ends" id="legEnds"><span>← 정원오 우세</span><span>오세훈 우세 →</span></div>
       <div id="hist"><div class="h-ttl">25개 구 격차 분포</div><svg id="histsvg" height="58" width="252"></svg></div>
     </div>
 
@@ -228,14 +274,19 @@
       <h2 class="p-name" id="pName"></h2>
       <div class="p-win" id="pWin"></div>
       <div class="p-cand">
-        <div class="pc-top"><span class="pc-name"><span class="dot oh"></span>오세훈 · 국민의힘</span><span class="pc-val oh" id="pOhVal"></span></div>
+        <div class="pc-top"><span class="pc-name"><span class="dot oh"></span>오세훈 <span class="pbadge ppp">국민의힘</span></span><span class="pc-val oh" id="pOhVal"></span></div>
         <div class="pc-bar"><div class="pc-fill fill-oh" id="pOhBar"></div></div>
       </div>
       <div class="p-cand">
-        <div class="pc-top"><span class="pc-name"><span class="dot jung"></span>정원오 · 더불어민주당</span><span class="pc-val jung" id="pJungVal"></span></div>
+        <div class="pc-top"><span class="pc-name"><span class="dot jung"></span>정원오 <span class="pbadge dem">더불어민주당</span></span><span class="pc-val jung" id="pJungVal"></span></div>
         <div class="pc-bar"><div class="pc-fill fill-jung" id="pJungBar"></div></div>
       </div>
       <div class="p-gap"><span class="pg-k">격차</span><span class="pg-v" id="pGap"></span></div>
+      <div class="p-note hidden" id="pNote">
+        <div class="pn-h">💬 왜 이런 결과?</div>
+        <div class="pn-b" id="pNoteBody"></div>
+        <span class="pn-src" id="pNoteSrc"></span>
+      </div>
       <div class="p-foot">구를 클릭하면 해당 지역으로 확대됩니다 · 출처 중앙선거관리위원회 개표결과</div>
     </aside>
   </div>
@@ -261,8 +312,20 @@ const NCLASS = 6;
 // 톤다운 다이버징 팔레트(순수 빨강·파랑 회피 → chromostereopsis 방지)
 // index 0 = 정원오 최강(차분한 파랑) ... 5 = 오세훈 최강(벽돌 주황)
 const RAMP = ["#2b5d8a","#5f93bd","#aecbe1","#f1cbb9","#cf8a6a","#a83e2c"];
+// 승자(승자독식) 뷰 2색 — 정당 원색(빨강/남색) 대신 톤다운 계열로 색입체시 회피
+const WIN_OH = "#c06a4c", WIN_JUNG = "#4f7fa8";
 
-const state = { method:"jenks", breaks:[], geo:null, votes:null, byName:{}, margins:[] };
+const state = { method:"jenks", view:"margin", breaks:[], geo:null, votes:null, byName:{}, margins:[] };
+
+// 주요 구 컨텍스트 노트 — 전부 실제 언론 보도 기반(창작 금지). 보도 없는 구는 항목 없음.
+const DISTRICT_NOTES = {
+  "강남구": { b:"고가 아파트가 밀집한 강남3구의 핵심. 재건축·보유세 등 부동산 규제 반발이 '자산 투표'로 결집해 오세훈 후보가 65.98%로 압승했고, 강남3구에서만 약 21만 표를 더 얻었다.", s:"한국일보 · 파이낸셜뉴스" },
+  "서초구": { b:"오 후보가 64.68%를 득표. 25개 구 중 투표율(약 66%)이 가장 높았고, 부동산 규제에 민감한 고가 주택지 표심이 강하게 결집했다.", s:"파이낸셜뉴스 · 뉴스핌" },
+  "송파구": { b:"잠실 재건축 등 정비사업 기대가 큰 강남3구의 일원. 부동산 규제 완화 공약이 표심을 움직이며 오 후보가 약 54.8%로 우세했다.", s:"기독일보 · 파이낸셜뉴스" },
+  "성동구": { b:"정원오 후보가 민선 6·7·8기 내리 지낸 성동구청장 정치적 텃밭(서울 유일의 3선 연임 구청장). 시장 선거에서도 정 후보가 우세했다.", s:"MBC · 뉴스토마토" },
+  "용산구": { b:"한강벨트의 핵심. 이촌·서빙고 등 고급 아파트 밀집지와 재개발 기대 지역에서 표가 결집해 오 후보가 57.09%로 앞섰다.", s:"한국일보 · 뉴스핌" },
+  "영등포구": { b:"여의도가 포함된 한강벨트 지역. 부동산·재건축 민심이 결집하며 오 후보가 50.50%로 신승했다.", s:"서울신문 · 기독일보" }
+};
 
 /* ---------- 유틸: 숫자 포맷 ---------- */
 const fmt = n => n.toLocaleString("ko-KR");
@@ -316,6 +379,8 @@ function classOf(val){
   return b.length-2;
 }
 const colorOf = val => RAMP[classOf(val)];
+// 지도 폴리곤 색: 격차 뷰 = 톤다운 다이버징, 승자 뷰 = 톤다운 2색
+function distColor(d){ return state.view==="winner" ? (d.winner==="오세훈"?WIN_OH:WIN_JUNG) : colorOf(d.margin_pct); }
 
 /* ---------- 툴팁 ---------- */
 const tip=document.getElementById("tip");
@@ -359,6 +424,23 @@ function districtAt(lng,lat){
 /* ---------- 범례 + 히스토그램 ---------- */
 function renderLegend(){
   const rows=document.getElementById("legrows"); rows.innerHTML="";
+  const ttl=document.getElementById("legTtl"), cap=document.getElementById("legcap");
+  const ends=document.getElementById("legEnds"), hist=document.getElementById("hist");
+  if(state.view==="winner"){
+    ttl.textContent="우세 후보 (승자독식)";
+    cap.textContent="구별 1위 후보를 단색으로 표시 — 격차 크기는 무시";
+    ends.style.display="none"; hist.style.display="none";
+    [["오세훈 우세",WIN_OH,state.votes.meta.districts_oh_win],
+     ["정원오 우세",WIN_JUNG,state.votes.meta.districts_jung_win]].forEach(([lab,col,n])=>{
+      const div=document.createElement("div"); div.className="lg-row";
+      div.innerHTML=`<span class="lg-sw" style="background:${col}"></span><span>${lab} · ${n}개 구</span>`;
+      rows.appendChild(div);
+    });
+    return;
+  }
+  ttl.textContent="오세훈 ↔ 정원오 격차 (%p)";
+  cap.textContent="정원오 우세(파랑) · 오세훈 우세(주황) · 진할수록 강함";
+  ends.style.display="flex"; hist.style.display="block";
   const b=state.breaks;
   // 진한쪽이 위로 오도록 위→아래 = 오세훈강 → 정원오강 (5..0)
   for(let i=NCLASS-1;i>=0;i--){
@@ -463,10 +545,27 @@ function openPanel(name,focus){
   requestAnimationFrame(()=>{ ob.style.width=(d.oh.pct/mx*100)+"%"; jb.style.width=(d.jung.pct/mx*100)+"%"; });
   const gapAbs=Math.abs(d.margin_votes);
   document.getElementById("pGap").innerHTML=`<span class="${winCls}">${d.winner} +${fmt(gapAbs)}표</span> <span style="color:var(--muted);font-weight:600;font-size:13px">(${pct(d.margin_pct)}%p)</span>`;
+  // 컨텍스트 노트 (보도 있는 구만)
+  const note=DISTRICT_NOTES[name], nEl=document.getElementById("pNote");
+  if(note){ document.getElementById("pNoteBody").textContent=note.b;
+    document.getElementById("pNoteSrc").textContent="출처 "+note.s; nEl.classList.remove("hidden"); }
+  else nEl.classList.add("hidden");
   document.getElementById("panel").classList.add("open");
   if(focus) focusDistrict(name);
 }
 function closePanel(){ document.getElementById("panel").classList.remove("open"); }
+
+/* ---------- 구 검색/점프 (datalist 자동완성) ---------- */
+function setupSearch(){
+  const dl=document.getElementById("distList");
+  dl.innerHTML=Object.keys(state.byName).map(n=>`<option value="${n}"></option>`).join("");
+  const inp=document.getElementById("distSearch");
+  const go=()=>{ let v=inp.value.trim(); if(!v) return;
+    if(!state.byName[v] && state.byName[v+"구"]) v=v+"구"; // "강남" → "강남구"
+    if(state.byName[v]){ openPanel(v,true); inp.value=""; inp.blur(); } };
+  inp.addEventListener("change",go);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+}
 function focusDistrict(name){
   const f=state.geo.features.find(f=>f.properties.name===name); if(!f) return;
   const c=centroidOf(f.geometry); if(!c) return;
@@ -528,7 +627,7 @@ function renderSVG(){
     eachRing(f.geometry,r=>{
       path += "M"+r.map(([x,y])=>X(x).toFixed(1)+","+Y(y).toFixed(1)).join("L")+"Z";
     });
-    out+=`<path class="dist" d="${path}" fill="${colorOf(d.margin_pct)}" stroke="#fff" stroke-width="1.1" data-name="${name}"></path>`;
+    out+=`<path class="dist" d="${path}" fill="${distColor(d)}" stroke="#fff" stroke-width="1.1" data-name="${name}"></path>`;
   });
   // 라벨
   state.geo.features.forEach(f=>{
@@ -548,7 +647,7 @@ function renderSVG(){
 function recolorSVG(){
   const svg=document.getElementById("svg");
   svg.querySelectorAll("path.dist").forEach(p=>{
-    p.setAttribute("fill",colorOf(state.byName[p.getAttribute("data-name")].margin_pct));
+    p.setAttribute("fill",distColor(state.byName[p.getAttribute("data-name")]));
   });
 }
 
@@ -592,7 +691,7 @@ function drawTmapPolys(){
       const pathLL=ring.map(([lng,lat])=>new Tmapv2.LatLng(lat,lng));
       const poly=new Tmapv2.Polygon({
         paths:pathLL, map:tmap,   // TMAP v2는 'paths'(복수) 키를 사용
-        fillColor:colorOf(d.margin_pct), fillOpacity:0.72,
+        fillColor:distColor(d), fillOpacity:0.72,
         strokeColor:"#ffffff", strokeWeight:1.4
       });
       // 폴리곤 click → 디테일 패널 + 해당 구로 확대
@@ -634,6 +733,19 @@ function applyMethod(m){
   renderLegend(); renderRank();
   if(tmap) recolorTmap(); else recolorSVG();
 }
+function applyView(v){
+  state.view=v;
+  const cap=document.getElementById("viewCap");
+  const mttl=document.getElementById("methodTtl"), mseg=document.getElementById("seg");
+  const winner=(v==="winner");
+  cap.textContent=winner
+    ? "구 수는 정원오 15 : 오세훈 10인데 오세훈 당선. 왜? '격차'로 바꿔 보세요."
+    : "격차가 클수록 진한 색. 강남3구의 압도적 격차가 구 수 열세를 뒤집었습니다.";
+  mttl.style.opacity=winner?.4:1; mseg.style.opacity=winner?.4:1;
+  mseg.style.pointerEvents=winner?"none":"auto";
+  renderLegend();
+  if(tmap) recolorTmap(); else recolorSVG();
+}
 
 /* ============================================================
    부트스트랩
@@ -668,6 +780,19 @@ async function boot(){
     });
   });
 
+  // 보기 모드 토글 (격차 ↔ 승자)
+  document.querySelectorAll("#viewSeg button").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#viewSeg button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active"); applyView(btn.dataset.v);
+    });
+  });
+  document.getElementById("viewCap").textContent=
+    "격차가 클수록 진한 색. 강남3구의 압도적 격차가 구 수 열세를 뒤집었습니다.";
+
+  // 구 검색
+  setupSearch();
+
   // 패널 닫기 / 랭킹 접기 / ESC
   document.getElementById("pClose").addEventListener("click",closePanel);
   document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePanel(); });
@@ -676,6 +801,11 @@ async function boot(){
     const r=document.getElementById("rank"); r.classList.toggle("collapsed");
     rankTg.textContent=r.classList.contains("collapsed")?"펼치기 ▼":"접기 ▲";
   });
+  // 모바일: 랭킹 카드 기본 접힘
+  if(window.innerWidth<=480){
+    document.getElementById("rank").classList.add("collapsed");
+    rankTg.textContent="펼치기 ▼";
+  }
 
   if(!TMAP_APP_KEY || !TMAP_APP_KEY.trim()){
     fallbackSVG("ℹ AppKey 미입력 — SVG 미리보기 모드 (키 입력 시 TMAP 지도 위에 렌더링)");
