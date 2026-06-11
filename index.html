@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>2026 서울시장 선거, 누가 어디서 이겼나 · 자치구별 단계구분도</title>
+
+<!-- Pretendard 웹폰트 (CDN) -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+<!-- =========================================================
+     TMAP AppKey — 여기 한 줄만 본인 키로 교체하세요.
+     SK open api(openapi.sk.com)에서 발급, "Any IP allowed" 설정 권장.
+     키가 비어 있으면 TMAP 베이스맵 대신 SVG 미리보기로 폴리곤이 그려집니다.
+     ========================================================= -->
+<script>
+  const TMAP_APP_KEY = "RVMiKy6kuc3Z84CsDD04s8ixee6bBtsN7bQNO8cn"; // <-- 여기에 AppKey 붙여넣기
+
+  // TMAP jsv2 SDK는 내부적으로 document.write로 하위 모듈을 로드하므로
+  // 반드시 "파싱 중 동기 로드"여야 한다(동적 append 시 LatLng/Map 생성자가 누락됨).
+  if (TMAP_APP_KEY && TMAP_APP_KEY.trim()) {
+    document.write(
+      '<scr'+'ipt src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey='
+      + encodeURIComponent(TMAP_APP_KEY) + '"><\/scr'+'ipt>'
+    );
+  }
+</script>
+
+<style>
+  :root{
+    --panel-bg: rgba(255,255,255,0.78);
+    --ink:#1c2230; --muted:#5b6577; --line:#dfe3ea;
+    --oh:#c0563c; --jung:#3f7bb0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:"Pretendard","Pretendard Variable","Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:#eef1f5;-webkit-font-smoothing:antialiased}
+  #app{display:flex;flex-direction:column;height:100%}
+
+  /* ---- 다크 네이비 헤더바 ---- */
+  header{display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding:13px 22px;background:linear-gradient(115deg,#0e1626 0%,#1a2740 58%,#16203a 100%);
+    color:#eef2f8;border-bottom:1px solid #0a1020;box-shadow:0 3px 16px rgba(8,14,28,.28);z-index:7}
+  header .head-l{min-width:0}
+  header h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.5px;color:#fff;line-height:1.15}
+  header .sub{margin-top:4px;font-size:12px;color:#9cafca;font-weight:500;letter-spacing:-.1px}
+  header .stats{display:flex;align-items:stretch;gap:9px;flex:none}
+  .statcard{display:flex;flex-direction:column;justify-content:center;gap:2px;
+    background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.13);border-radius:13px;
+    padding:8px 15px;min-width:138px;backdrop-filter:blur(4px)}
+  .statcard .sc-top{display:flex;align-items:center;gap:7px;font-size:11px;color:#9cafca;font-weight:700}
+  .statcard .sc-main{font-size:17px;font-weight:800;letter-spacing:-.4px;color:#fff}
+  .statcard .sc-sub{font-size:11px;color:#9cafca;font-weight:500}
+  .statcard.win{border-color:rgba(216,105,78,.55);background:rgba(216,105,78,.14)}
+  .badge-win{font-size:9.5px;font-weight:800;color:#10182b;background:#ffce9e;border-radius:5px;padding:1px 6px}
+  .gap-pill{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:6px 13px;border-radius:13px;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.22)}
+  .gap-pill .gp-k{font-size:10px;color:#9cafca;font-weight:700}
+  .gap-pill .gp-v{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px}
+  .gap-pill .gp-s{font-size:10px;color:#9cafca}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 2px rgba(255,255,255,.16)}
+  .dot.oh{background:#d8694e}.dot.jung{background:#4f8bc0}
+  .oh{color:var(--oh)}.jung{color:var(--jung)}
+  @media(max-width:860px){ header .sub{display:none} .statcard{min-width:0;padding:7px 10px} header h1{font-size:16px} }
+
+  #main{position:relative;flex:1;min-height:0}
+  #map{position:absolute;inset:0}
+  #svgwrap{position:absolute;inset:0;display:none;background:radial-gradient(circle at 50% 30%,#fbfcfe,#e9edf3)}
+  #svgwrap svg{width:100%;height:100%}
+
+  /* 미리보기 안내 배너 */
+  #banner{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+    background:#fff4e5;border:1px solid #f0c98a;color:#8a5a12;font-size:12px;
+    padding:7px 14px;border-radius:8px;z-index:6;display:none;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+  /* 반투명 블러 카드 공통 */
+  .glass{background:var(--panel-bg);border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 8px 28px rgba(15,22,40,.16),0 1px 2px rgba(15,22,40,.06);
+    backdrop-filter:blur(14px) saturate(1.25);-webkit-backdrop-filter:blur(14px) saturate(1.25)}
+
+  /* 컨트롤(분류법 토글) */
+  #controls{position:absolute;top:14px;left:14px;border-radius:14px;padding:11px 13px;z-index:6}
+  #controls .ttl{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700}
+  #controls .seg{display:flex;gap:4px}
+  #controls button{font-size:12px;padding:5px 10px;border:1px solid var(--line);background:rgba(255,255,255,.6);border-radius:8px;cursor:pointer;color:var(--ink);font-weight:600;transition:all .12s}
+  #controls button:hover{background:#fff}
+  #controls button.active{background:#1a2740;color:#fff;border-color:#1a2740}
+
+  /* 범례 + 히스토그램 */
+  #legend{position:absolute;right:14px;bottom:14px;width:280px;
+    border-radius:14px;padding:13px 15px;z-index:6}
+  #legend .ttl{font-size:12px;font-weight:700;margin-bottom:2px}
+  #legend .cap{font-size:11px;color:var(--muted);margin-bottom:8px}
+  .lg-row{display:flex;align-items:center;gap:8px;font-size:11.5px;margin:2px 0}
+  .lg-sw{width:22px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.15);flex:none}
+  .lg-ends{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:4px}
+  #hist{margin-top:10px}
+  #hist .h-ttl{font-size:11px;color:var(--muted);margin-bottom:4px}
+
+  /* 툴팁 */
+  #tip{position:fixed;pointer-events:none;z-index:20;display:none;max-width:240px;
+    background:rgba(22,28,40,.96);color:#fff;padding:10px 12px;border-radius:9px;font-size:12px;line-height:1.5;
+    box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  #tip .t-name{font-weight:700;font-size:13px;margin-bottom:5px}
+  #tip .t-row{display:flex;justify-content:space-between;gap:14px}
+  #tip .t-oh{color:#ffb4a3}#tip .t-jung{color:#a9cdf0}
+  #tip .t-gap{margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.18);font-size:11.5px}
+  #tip .win-oh{color:#ffb4a3;font-weight:700}#tip .win-jung{color:#a9cdf0;font-weight:700}
+
+  .credit{position:absolute;left:14px;bottom:14px;font-size:10.5px;color:var(--muted);
+    background:rgba(255,255,255,.8);padding:3px 8px;border-radius:7px;z-index:6}
+  svg text.lbl{font-size:9.5px;fill:#2b3340;paint-order:stroke;stroke:rgba(255,255,255,.85);stroke-width:2.4px;stroke-linejoin:round;font-weight:600;pointer-events:none}
+  svg path.dist{cursor:pointer;transition:opacity .12s}
+  svg path.dist:hover{opacity:.82}
+
+  /* ---- 지도 위 구 이름 라벨 (TMAP marker iconHTML) ---- */
+  .maplbl{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;pointer-events:none;
+    text-shadow:0 0 3px rgba(10,16,28,.95),0 1px 2px rgba(10,16,28,.9),0 0 6px rgba(10,16,28,.7);
+    letter-spacing:-.2px;transform:translate(-50%,-50%);line-height:1}
+
+  /* ---- 우측 슬라이드인 디테일 패널 ---- */
+  #panel{position:absolute;top:0;right:0;height:100%;width:330px;max-width:84vw;z-index:9;
+    background:rgba(255,255,255,.9);border-left:1px solid rgba(255,255,255,.6);
+    box-shadow:-12px 0 36px rgba(15,22,40,.2);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
+    transform:translateX(102%);transition:transform .34s cubic-bezier(.22,.61,.36,1);
+    display:flex;flex-direction:column;padding:20px 20px 18px}
+  #panel.open{transform:translateX(0)}
+  #panel .p-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border:none;cursor:pointer;
+    border-radius:9px;background:rgba(20,28,44,.06);color:#41506a;font-size:17px;line-height:1;font-weight:700}
+  #panel .p-close:hover{background:rgba(20,28,44,.13)}
+  #panel .p-rank{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;
+    padding:4px 10px;border-radius:999px;align-self:flex-start;margin-bottom:8px}
+  #panel .p-name{font-size:25px;font-weight:800;letter-spacing:-.6px;margin:0 0 2px}
+  #panel .p-win{font-size:12.5px;font-weight:700;margin-bottom:18px}
+  .p-cand{margin:14px 0}
+  .p-cand .pc-top{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:5px}
+  .p-cand .pc-name{font-weight:700;display:flex;align-items:center;gap:6px}
+  .p-cand .pc-val{font-weight:800;font-size:13px}
+  .p-cand .pc-bar{height:13px;border-radius:7px;background:rgba(20,28,44,.07);overflow:hidden}
+  .p-cand .pc-fill{height:100%;border-radius:7px;transition:width .5s cubic-bezier(.22,.61,.36,1)}
+  .fill-oh{background:linear-gradient(90deg,#d8694e,#bb4c30)}
+  .fill-jung{background:linear-gradient(90deg,#5f99c9,#3f7bb0)}
+  #panel .p-gap{margin-top:20px;padding:13px 15px;border-radius:12px;background:rgba(20,28,44,.05);
+    display:flex;flex-direction:column;gap:3px}
+  #panel .p-gap .pg-k{font-size:11px;color:var(--muted);font-weight:700}
+  #panel .p-gap .pg-v{font-size:18px;font-weight:800;letter-spacing:-.4px}
+  #panel .p-foot{margin-top:auto;font-size:10.5px;color:var(--muted);padding-top:14px}
+
+  /* ---- 좌하단 25개 구 랭킹 바차트 ---- */
+  #rank{position:absolute;left:14px;bottom:44px;width:236px;border-radius:14px;padding:11px 12px 9px;z-index:6}
+  #rank .r-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+  #rank .r-ttl{font-size:11.5px;font-weight:800}
+  #rank .r-tg{font-size:10px;color:var(--muted);cursor:pointer;border:none;background:none;padding:0;font-weight:600}
+  #rank .r-list{display:flex;flex-direction:column;gap:2px;max-height:300px;overflow:hidden;transition:max-height .25s}
+  #rank.collapsed .r-list{max-height:0}
+  .r-row{display:grid;grid-template-columns:46px 1fr 40px;align-items:center;gap:6px;cursor:pointer;border-radius:5px;padding:1px 3px;transition:background .1s}
+  .r-row:hover,.r-row.hot{background:rgba(20,28,44,.09)}
+  .r-row .r-nm{font-size:10px;font-weight:600;color:#3a4659;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .r-row .r-track{height:9px;background:rgba(20,28,44,.06);border-radius:5px;position:relative;overflow:hidden}
+  .r-row .r-bar{position:absolute;top:0;height:100%;border-radius:5px}
+  .r-row .r-val{font-size:9.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+
+  /* ---- 인트로 스플래시 ---- */
+  #splash{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    background:radial-gradient(circle at 50% 42%,#1a2740,#0c1422 80%);color:#fff;
+    animation:splashOut .5s ease 1.2s forwards}
+  #splash .sp-t{font-size:30px;font-weight:800;letter-spacing:-.8px;opacity:0;transform:translateY(10px);animation:spIn .55s cubic-bezier(.22,.61,.36,1) .12s forwards}
+  #splash .sp-s{font-size:14px;color:#9cafca;opacity:0;animation:spIn .55s ease .32s forwards}
+  #splash .sp-dots{display:flex;gap:8px;margin-top:4px;opacity:0;animation:spIn .5s ease .5s forwards}
+  #splash .sp-dots i{width:11px;height:11px;border-radius:50%}
+  @keyframes spIn{to{opacity:1;transform:none}}
+  @keyframes splashOut{to{opacity:0;visibility:hidden}}
+  #splash.done{display:none}
+  @media(prefers-reduced-motion:reduce){
+    #splash{animation:splashOut .01s ease .35s forwards}
+    #splash .sp-t,#splash .sp-s,#splash .sp-dots{animation-duration:.01s}
+    .p-cand .pc-fill,#panel{transition:none}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="head-l">
+      <h1>2026 서울시장 선거, 누가 어디서 이겼나</h1>
+      <div class="sub">제9회 지방선거 자치구별 단계구분도 · 출처 중앙선거관리위원회</div>
+    </div>
+    <div class="stats" id="stats">
+      <div class="statcard win" id="sc-oh"><div class="sc-top"><span class="dot oh"></span>오세훈 <span class="badge-win">당선</span></div><div class="sc-main">—</div><div class="sc-sub">—</div></div>
+      <div class="gap-pill" id="sc-gap"><div class="gp-k">격차</div><div class="gp-v">—</div><div class="gp-s">—</div></div>
+      <div class="statcard" id="sc-jung"><div class="sc-top"><span class="dot jung"></span>정원오</div><div class="sc-main">—</div><div class="sc-sub">—</div></div>
+    </div>
+  </header>
+
+  <div id="main">
+    <div id="map"></div>
+    <div id="svgwrap"><svg id="svg" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+    <div id="banner"></div>
+
+    <div id="controls" class="glass">
+      <div class="ttl">분류법 (6단계)</div>
+      <div class="seg" id="seg">
+        <button data-m="jenks" class="active">자연분류</button>
+        <button data-m="equal">등간격</button>
+        <button data-m="quantile">분위수</button>
+      </div>
+    </div>
+
+    <div id="rank" class="glass">
+      <div class="r-hd"><span class="r-ttl">자치구 격차 랭킹</span><button class="r-tg" id="rankTg">접기 ▲</button></div>
+      <div class="r-list" id="rankList"></div>
+    </div>
+
+    <div id="legend" class="glass">
+      <div class="ttl">오세훈 ↔ 정원오 격차 (%p)</div>
+      <div class="cap" id="legcap">정원오 우세(파랑) · 오세훈 우세(주황) · 진할수록 강함</div>
+      <div id="legrows"></div>
+      <div class="lg-ends"><span>← 정원오 우세</span><span>오세훈 우세 →</span></div>
+      <div id="hist"><div class="h-ttl">25개 구 격차 분포</div><svg id="histsvg" height="58" width="252"></svg></div>
+    </div>
+
+    <div class="credit">경계: southkorea/seoul-maps · 지도: TMAP</div>
+
+    <aside id="panel">
+      <button class="p-close" id="pClose" aria-label="닫기">×</button>
+      <span class="p-rank" id="pRank"></span>
+      <h2 class="p-name" id="pName"></h2>
+      <div class="p-win" id="pWin"></div>
+      <div class="p-cand">
+        <div class="pc-top"><span class="pc-name"><span class="dot oh"></span>오세훈 · 국민의힘</span><span class="pc-val oh" id="pOhVal"></span></div>
+        <div class="pc-bar"><div class="pc-fill fill-oh" id="pOhBar"></div></div>
+      </div>
+      <div class="p-cand">
+        <div class="pc-top"><span class="pc-name"><span class="dot jung"></span>정원오 · 더불어민주당</span><span class="pc-val jung" id="pJungVal"></span></div>
+        <div class="pc-bar"><div class="pc-fill fill-jung" id="pJungBar"></div></div>
+      </div>
+      <div class="p-gap"><span class="pg-k">격차</span><span class="pg-v" id="pGap"></span></div>
+      <div class="p-foot">구를 클릭하면 해당 지역으로 확대됩니다 · 출처 중앙선거관리위원회 개표결과</div>
+    </aside>
+  </div>
+</div>
+
+<div id="splash" aria-hidden="true">
+  <div class="sp-dots"><i style="background:#d8694e"></i><i style="background:#4f8bc0"></i></div>
+  <div class="sp-t">2026 서울시장 선거</div>
+  <div class="sp-s">누가 어디서 이겼나 — 자치구별 단계구분도</div>
+</div>
+
+<div id="tip"></div>
+
+<script>
+/* ============================================================
+   2026 서울시장 자치구별 단계구분도
+   - 데이터: data/votes.json (실데이터, 중앙선관위 개표결과 집계)
+   - 경계:   data/seoul_municipalities.geojson (WGS84)
+   - 렌더:   TMAP JS Map SDK(jsv2) 위 폴리곤 / 키 없으면 SVG 미리보기
+   ============================================================ */
+
+const NCLASS = 6;
+// 톤다운 다이버징 팔레트(순수 빨강·파랑 회피 → chromostereopsis 방지)
+// index 0 = 정원오 최강(차분한 파랑) ... 5 = 오세훈 최강(벽돌 주황)
+const RAMP = ["#2b5d8a","#5f93bd","#aecbe1","#f1cbb9","#cf8a6a","#a83e2c"];
+
+const state = { method:"jenks", breaks:[], geo:null, votes:null, byName:{}, margins:[] };
+
+/* ---------- 유틸: 숫자 포맷 ---------- */
+const fmt = n => n.toLocaleString("ko-KR");
+const pct = n => (n>=0?"+":"") + n.toFixed(2);
+
+/* ---------- 분류법 ---------- */
+function equalBreaks(vals,k){
+  const mn=Math.min(...vals),mx=Math.max(...vals),step=(mx-mn)/k;
+  return Array.from({length:k+1},(_,i)=>mn+step*i);
+}
+function quantileBreaks(vals,k){
+  const s=[...vals].sort((a,b)=>a-b),br=[s[0]];
+  for(let i=1;i<k;i++){ br.push(s[Math.floor(i*s.length/k)]); }
+  br.push(s[s.length-1]); return br;
+}
+function jenksBreaks(vals,k){
+  const d=[...vals].sort((a,b)=>a-b),n=d.length;
+  const mat1=Array.from({length:n+1},()=>new Array(k+1).fill(0));
+  const mat2=Array.from({length:n+1},()=>new Array(k+1).fill(0));
+  for(let i=1;i<=k;i++){ mat1[1][i]=1; mat2[1][i]=0; for(let j=2;j<=n;j++) mat2[j][i]=Infinity; }
+  for(let l=2;l<=n;l++){
+    let s1=0,s2=0,w=0;
+    for(let m=1;m<=l;m++){
+      const i3=l-m+1,val=d[i3-1];
+      s2+=val*val; s1+=val; w++;
+      const variance=s2-(s1*s1)/w, i4=i3-1;
+      if(i4!==0){
+        for(let j=2;j<=k;j++){
+          if(mat2[l][j]>=variance+mat2[i4][j-1]){
+            mat1[l][j]=i3; mat2[l][j]=variance+mat2[i4][j-1];
+          }
+        }
+      }
+    }
+    mat1[l][1]=1; mat2[l][1]=s2-(s1*s1)/w;
+  }
+  const kb=new Array(k+1); kb[k]=d[n-1]; kb[0]=d[0];
+  let kclass=k, idx=n;
+  while(kclass>1){ const id=mat1[idx][kclass]-1; kb[kclass-1]=d[id]; idx=mat1[idx][kclass]-1; kclass--; }
+  return kb;
+}
+function computeBreaks(){
+  const v=state.margins;
+  if(state.method==="equal") return equalBreaks(v,NCLASS);
+  if(state.method==="quantile") return quantileBreaks(v,NCLASS);
+  return jenksBreaks(v,NCLASS);
+}
+function classOf(val){
+  const b=state.breaks;
+  for(let i=1;i<b.length;i++){ if(val<=b[i]) return i-1; }
+  return b.length-2;
+}
+const colorOf = val => RAMP[classOf(val)];
+
+/* ---------- 툴팁 ---------- */
+const tip=document.getElementById("tip");
+function tipHTML(d){
+  const winCls = d.winner==="오세훈" ? "win-oh":"win-jung";
+  const gapAbs = Math.abs(d.margin_votes);
+  return `<div class="t-name">${d.name} · <span class="${winCls}">${d.winner} 우세</span></div>
+    <div class="t-row"><span class="t-oh">오세훈 (국민의힘)</span><span>${fmt(d.oh.votes)}표 · ${d.oh.pct.toFixed(2)}%</span></div>
+    <div class="t-row"><span class="t-jung">정원오 (더불어민주당)</span><span>${fmt(d.jung.votes)}표 · ${d.jung.pct.toFixed(2)}%</span></div>
+    <div class="t-gap">격차 <b>${d.winner} +${fmt(gapAbs)}표</b> (${pct(d.margin_pct)}%p)</div>`;
+}
+function showTip(d,x,y){ tip.innerHTML=tipHTML(d); tip.style.display="block"; moveTip(x,y); }
+function moveTip(x,y){
+  const w=tip.offsetWidth,h=tip.offsetHeight;
+  let nx=x+14,ny=y+14;
+  if(nx+w>window.innerWidth) nx=x-w-14;
+  if(ny+h>window.innerHeight) ny=y-h-14;
+  tip.style.left=nx+"px"; tip.style.top=ny+"px";
+}
+function hideTip(){ tip.style.display="none"; }
+const lastMouse={x:0,y:0};
+document.addEventListener("mousemove",e=>{ lastMouse.x=e.clientX; lastMouse.y=e.clientY; if(tip.style.display==="block") moveTip(e.clientX,e.clientY); });
+
+// point-in-polygon (ray casting). TMAP 폴리곤은 hover 이벤트를 지원하지 않아
+// 맵 mousemove 좌표로 직접 구를 판정한다.
+function pointInRing(lng,lat,ring){
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+    if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function districtAt(lng,lat){
+  for(const f of state.geo.features){
+    for(const r of outerRings(f.geometry)){ if(pointInRing(lng,lat,r)) return f.properties.name; }
+  }
+  return null;
+}
+
+/* ---------- 범례 + 히스토그램 ---------- */
+function renderLegend(){
+  const rows=document.getElementById("legrows"); rows.innerHTML="";
+  const b=state.breaks;
+  // 진한쪽이 위로 오도록 위→아래 = 오세훈강 → 정원오강 (5..0)
+  for(let i=NCLASS-1;i>=0;i--){
+    const lo=b[i], hi=b[i+1];
+    const div=document.createElement("div"); div.className="lg-row";
+    div.innerHTML=`<span class="lg-sw" style="background:${RAMP[i]}"></span>
+      <span>${pct(lo)} ~ ${pct(hi)} %p</span>`;
+    rows.appendChild(div);
+  }
+  renderHist();
+}
+function renderHist(){
+  const svg=document.getElementById("histsvg");
+  const W=252,H=58,pad=4, v=state.margins;
+  const mn=Math.min(...v),mx=Math.max(...v),range=mx-mn||1;
+  const bins=14, counts=new Array(bins).fill(0), binVals=new Array(bins).fill(0).map(()=>[]);
+  v.forEach(x=>{ let bi=Math.min(bins-1,Math.floor((x-mn)/range*bins)); counts[bi]++; binVals[bi].push(x); });
+  const maxC=Math.max(...counts), bw=(W-pad*2)/bins;
+  let html="";
+  // 0(동률) 기준선
+  const zeroX = pad + (0-mn)/range*(W-pad*2);
+  if(0>=mn&&0<=mx) html+=`<line x1="${zeroX}" y1="0" x2="${zeroX}" y2="${H-12}" stroke="#9aa3b2" stroke-dasharray="2 2" stroke-width="1"/>`;
+  for(let i=0;i<bins;i++){
+    if(!counts[i]) continue;
+    const h=(counts[i]/maxC)*(H-16);
+    const x=pad+i*bw, y=(H-12)-h;
+    const mid=binVals[i].reduce((a,c)=>a+c,0)/binVals[i].length;
+    html+=`<rect x="${x+0.5}" y="${y}" width="${bw-1}" height="${h}" fill="${colorOf(mid)}" rx="1"/>`;
+  }
+  html+=`<text x="${pad}" y="${H-2}" font-size="9" fill="#8a93a3">${pct(mn)}</text>`;
+  html+=`<text x="${W-pad}" y="${H-2}" font-size="9" fill="#8a93a3" text-anchor="end">${pct(mx)}</text>`;
+  svg.innerHTML=html;
+}
+
+/* ---------- 헤더 스탯 카드 ---------- */
+function renderTotals(){
+  const m=state.votes.meta, o=m.city_total_official;
+  const gap=o["오세훈"]-o["정원오"];
+  const gapPct=(o["오세훈_pct"]-o["정원오_pct"]).toFixed(2);
+  const fill=(id,main,sub)=>{const el=document.getElementById(id);
+    el.querySelector(".sc-main").textContent=main; el.querySelector(".sc-sub").textContent=sub;};
+  fill("sc-oh", o["오세훈_pct"]+"%", fmt(o["오세훈"])+"표");
+  fill("sc-jung", o["정원오_pct"]+"%", fmt(o["정원오"])+"표");
+  const gp=document.getElementById("sc-gap");
+  gp.querySelector(".gp-v").textContent="+"+fmt(gap)+"표";
+  gp.querySelector(".gp-s").textContent="+"+gapPct+"%p · 우세 구 "+m.districts_oh_win+":"+m.districts_jung_win;
+}
+
+/* ---------- 랭킹 계산 + 바차트 + 하이라이트 동기화 ---------- */
+function buildRanks(){
+  const arr=Object.values(state.byName);
+  state.ranked=[...arr].sort((a,b)=>b.margin_pct-a.margin_pct); // 오세훈 강 → 정원오 강
+  const oh=arr.filter(d=>d.winner==="오세훈").sort((a,b)=>b.margin_pct-a.margin_pct);
+  const ju=arr.filter(d=>d.winner==="정원오").sort((a,b)=>a.margin_pct-b.margin_pct);
+  state.rankIn={};
+  oh.forEach((d,i)=>state.rankIn[d.name]={who:"오세훈",pos:i+1,total:oh.length});
+  ju.forEach((d,i)=>state.rankIn[d.name]={who:"정원오",pos:i+1,total:ju.length});
+}
+function renderRank(){
+  const list=document.getElementById("rankList"); if(!state.ranked) return;
+  const maxAbs=Math.max(...state.ranked.map(d=>Math.abs(d.margin_pct)))||1;
+  list.innerHTML="";
+  state.ranked.forEach(d=>{
+    const isOh=d.margin_pct>=0, w=Math.abs(d.margin_pct)/maxAbs*50;
+    const bar=isOh?`left:50%;width:${w}%`:`right:50%;width:${w}%`;
+    const row=document.createElement("div"); row.className="r-row"; row.dataset.name=d.name;
+    row.innerHTML=`<span class="r-nm">${d.name}</span>`+
+      `<span class="r-track"><span style="position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:rgba(20,28,44,.22)"></span>`+
+      `<span class="r-bar" style="${bar};background:${colorOf(d.margin_pct)}"></span></span>`+
+      `<span class="r-val" style="color:${isOh?'var(--oh)':'var(--jung)'}">${pct(d.margin_pct)}</span>`;
+    row.addEventListener("mouseenter",()=>highlight(d.name,true));
+    row.addEventListener("mouseleave",()=>highlight(d.name,false));
+    row.addEventListener("click",()=>openPanel(d.name,true));
+    list.appendChild(row);
+  });
+}
+function highlight(name,on){
+  document.querySelectorAll(".r-row").forEach(r=>{ if(r.dataset.name===name) r.classList.toggle("hot",on); });
+  if(tmap){ tmapPolys.forEach(p=>{ if(p._dname===name){ try{ p.setOptions({strokeColor:on?"#10182b":"#ffffff",strokeWeight:on?3:1.4}); }catch(e){} } }); }
+  else { const el=document.querySelector(`#svg path.dist[data-name="${CSS.escape(name)}"]`);
+    if(el){ el.setAttribute("stroke",on?"#10182b":"#fff"); el.setAttribute("stroke-width",on?"2.4":"1.1"); } }
+}
+
+/* ---------- 우측 디테일 패널 ---------- */
+function openPanel(name,focus){
+  const d=state.byName[name]; if(!d) return;
+  const r=state.rankIn?state.rankIn[name]:null;
+  const isOh=d.margin_pct>=0, winCls=d.winner==="오세훈"?"oh":"jung";
+  const pill=document.getElementById("pRank");
+  if(r){ pill.textContent=`${r.who} 우세 ${r.pos}위 / ${r.total}곳`;
+    pill.style.background=isOh?"rgba(216,105,78,.15)":"rgba(79,139,192,.15)";
+    pill.style.color=isOh?"var(--oh)":"var(--jung)"; pill.style.display="inline-flex"; }
+  else pill.style.display="none";
+  document.getElementById("pName").textContent=d.name;
+  document.getElementById("pWin").innerHTML=`<span class="${winCls}">${d.winner} 후보 우세</span>`;
+  document.getElementById("pOhVal").textContent=`${fmt(d.oh.votes)}표 · ${d.oh.pct.toFixed(2)}%`;
+  document.getElementById("pJungVal").textContent=`${fmt(d.jung.votes)}표 · ${d.jung.pct.toFixed(2)}%`;
+  const mx=Math.max(d.oh.pct,d.jung.pct)||1;
+  // 트랜지션 재생을 위해 0 → 목표 너비
+  const ob=document.getElementById("pOhBar"), jb=document.getElementById("pJungBar");
+  ob.style.width="0"; jb.style.width="0";
+  requestAnimationFrame(()=>{ ob.style.width=(d.oh.pct/mx*100)+"%"; jb.style.width=(d.jung.pct/mx*100)+"%"; });
+  const gapAbs=Math.abs(d.margin_votes);
+  document.getElementById("pGap").innerHTML=`<span class="${winCls}">${d.winner} +${fmt(gapAbs)}표</span> <span style="color:var(--muted);font-weight:600;font-size:13px">(${pct(d.margin_pct)}%p)</span>`;
+  document.getElementById("panel").classList.add("open");
+  if(focus) focusDistrict(name);
+}
+function closePanel(){ document.getElementById("panel").classList.remove("open"); }
+function focusDistrict(name){
+  const f=state.geo.features.find(f=>f.properties.name===name); if(!f) return;
+  const c=centroidOf(f.geometry); if(!c) return;
+  if(tmap){ try{ tmap.setCenter(new Tmapv2.LatLng(c[1],c[0]+0.012)); tmap.setZoom(12); }catch(e){} }
+}
+
+/* ============================================================
+   GEOMETRY 헬퍼
+   ============================================================ */
+function eachRing(geom, cb){ // cb(ring=[[lng,lat],...])
+  if(geom.type==="Polygon") geom.coordinates.forEach(cb);
+  else if(geom.type==="MultiPolygon") geom.coordinates.forEach(p=>p.forEach(cb));
+}
+function outerRings(geom){
+  if(geom.type==="Polygon") return [geom.coordinates[0]];
+  if(geom.type==="MultiPolygon") return geom.coordinates.map(p=>p[0]);
+  return [];
+}
+function centroidOf(geom){ // 면적 가중 근사 (가장 큰 외곽링 기준)
+  let best=null,bestA=-1;
+  outerRings(geom).forEach(r=>{
+    let a=0,cx=0,cy=0;
+    for(let i=0,j=r.length-1;i<r.length;j=i++){
+      const f=r[j][0]*r[i][1]-r[i][0]*r[j][1]; a+=f; cx+=(r[j][0]+r[i][0])*f; cy+=(r[j][1]+r[i][1])*f;
+    }
+    a*=0.5; if(Math.abs(a)>bestA){ bestA=Math.abs(a); best=[cx/(6*a),cy/(6*a)]; }
+  });
+  return best;
+}
+
+/* ============================================================
+   1) SVG 미리보기 렌더 (AppKey 없거나 TMAP 로드 실패 시)
+   ============================================================ */
+function bbox(geo){
+  let mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;
+  geo.features.forEach(f=>eachRing(f.geometry,r=>r.forEach(([x,y])=>{
+    if(x<mnx)mnx=x; if(x>mxx)mxx=x; if(y<mny)mny=y; if(y>mxy)mxy=y;
+  })));
+  return [mnx,mny,mxx,mxy];
+}
+function renderSVG(){
+  const wrap=document.getElementById("svgwrap"), svg=document.getElementById("svg");
+  wrap.style.display="block";
+  const W=1000,H=720,pad=24;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const [mnx,mny,mxx,mxy]=bbox(state.geo);
+  // Web Mercator: 경도·위도 모두 라디안 기반으로 통일해야 종횡비가 맞음
+  const mercX = lng => lng*Math.PI/180;
+  const mercY = lat => Math.log(Math.tan(Math.PI/4 + lat*Math.PI/360));
+  const mx0=mercX(mnx),mx1=mercX(mxx),my0=mercY(mny),my1=mercY(mxy);
+  const sx=(W-pad*2)/(mx1-mx0), sy=(H-pad*2)/(my1-my0), s=Math.min(sx,sy);
+  const offx=pad+((W-pad*2)-(mx1-mx0)*s)/2, offy=pad+((H-pad*2)-(my1-my0)*s)/2;
+  const X = lng => offx+(mercX(lng)-mx0)*s;
+  const Y = lat => offy+(my1-mercY(lat))*s;
+  let out="";
+  state.geo.features.forEach(f=>{
+    const name=f.properties.name, d=state.byName[name]; if(!d) return;
+    let path="";
+    eachRing(f.geometry,r=>{
+      path += "M"+r.map(([x,y])=>X(x).toFixed(1)+","+Y(y).toFixed(1)).join("L")+"Z";
+    });
+    out+=`<path class="dist" d="${path}" fill="${colorOf(d.margin_pct)}" stroke="#fff" stroke-width="1.1" data-name="${name}"></path>`;
+  });
+  // 라벨
+  state.geo.features.forEach(f=>{
+    const c=centroidOf(f.geometry); if(!c) return;
+    out+=`<text class="lbl" x="${X(c[0]).toFixed(1)}" y="${Y(c[1]).toFixed(1)}" text-anchor="middle">${f.properties.name.replace(/구$/,"")}</text>`;
+  });
+  svg.innerHTML=out;
+  svg.querySelectorAll("path.dist").forEach(p=>{
+    const nm=p.getAttribute("data-name"), d=state.byName[nm];
+    p.addEventListener("mouseenter",e=>{ p.setAttribute("stroke","#10182b"); p.setAttribute("stroke-width","2.2"); showTip(d,e.clientX,e.clientY);
+      document.querySelectorAll(".r-row").forEach(r=>{ if(r.dataset.name===nm) r.classList.add("hot"); }); });
+    p.addEventListener("mouseleave",()=>{ p.setAttribute("stroke","#fff"); p.setAttribute("stroke-width","1.1"); hideTip();
+      document.querySelectorAll(".r-row.hot").forEach(r=>r.classList.remove("hot")); });
+    p.addEventListener("click",()=>openPanel(nm,true));
+  });
+}
+function recolorSVG(){
+  const svg=document.getElementById("svg");
+  svg.querySelectorAll("path.dist").forEach(p=>{
+    p.setAttribute("fill",colorOf(state.byName[p.getAttribute("data-name")].margin_pct));
+  });
+}
+
+/* ============================================================
+   2) TMAP 렌더 (AppKey 있을 때)
+   ============================================================ */
+let tmap=null, tmapPolys=[];
+function initTmap(){
+  const center=new Tmapv2.LatLng(37.5665,126.9780);
+  tmap=new Tmapv2.Map("map",{center,width:"100%",height:"100%",zoom:11,zoomControl:true,scrollwheel:true});
+  // 폴리곤은 맵 렌더 컨텍스트 준비 후 그려야 한다(즉시 그리면 drawTo null 에러).
+  let drawn=false;
+  const go=()=>{ if(drawn) return; drawn=true; try{ drawTmapPolys(); addTmapLabels(); }catch(e){ console.error("polys",e); } };
+  try{ tmap.addListener("configload", go); }catch(e){}
+  setTimeout(go, 1500); // 이벤트 미발생 대비 폴백
+
+  // 줌 레벨에 따른 라벨 가시성 (11 미만이면 숨김)
+  try{ tmap.addListener("zoom_changed", updateLabelVis); }catch(e){}
+  try{ tmap.addListener("zoomend", updateLabelVis); }catch(e){}
+
+  // hover 툴팁: 맵 mousemove 좌표 → point-in-polygon (+ 랭킹 행 하이라이트)
+  let curHover=null;
+  const clearRowHot=()=>document.querySelectorAll(".r-row.hot").forEach(r=>r.classList.remove("hot"));
+  tmap.addListener("mousemove", e=>{
+    if(!e || !e.latLng) return;
+    const name=districtAt(e.latLng._lng, e.latLng._lat);
+    if(name){
+      if(name!==curHover){ curHover=name; showTip(state.byName[name], lastMouse.x, lastMouse.y);
+        clearRowHot(); document.querySelectorAll(".r-row").forEach(r=>{ if(r.dataset.name===name) r.classList.add("hot"); }); }
+      else moveTip(lastMouse.x, lastMouse.y);
+    }else if(curHover){ curHover=null; hideTip(); clearRowHot(); }
+  });
+  const mapEl=document.getElementById("map");
+  mapEl.addEventListener("mouseleave",()=>{ curHover=null; hideTip(); clearRowHot(); });
+}
+function drawTmapPolys(){
+  tmapPolys.forEach(p=>p.setMap(null)); tmapPolys=[];
+  state.geo.features.forEach(f=>{
+    const name=f.properties.name, d=state.byName[name]; if(!d) return;
+    outerRings(f.geometry).forEach(ring=>{
+      const pathLL=ring.map(([lng,lat])=>new Tmapv2.LatLng(lat,lng));
+      const poly=new Tmapv2.Polygon({
+        paths:pathLL, map:tmap,   // TMAP v2는 'paths'(복수) 키를 사용
+        fillColor:colorOf(d.margin_pct), fillOpacity:0.72,
+        strokeColor:"#ffffff", strokeWeight:1.4
+      });
+      // 폴리곤 click → 디테일 패널 + 해당 구로 확대
+      poly.addListener("click",()=>{ openPanel(name,true); });
+      poly._dname=name;
+      tmapPolys.push(poly);
+    });
+  });
+}
+function recolorTmap(){ drawTmapPolys(); } // 색 갱신은 전체 재그리기로 안전 처리
+
+/* ---------- TMAP 구 이름 라벨 (centroid 마커) ---------- */
+let tmapLabels=[];
+function addTmapLabels(){
+  tmapLabels.forEach(m=>{ try{ m.setMap(null); }catch(e){} }); tmapLabels=[];
+  state.geo.features.forEach(f=>{
+    const c=centroidOf(f.geometry); if(!c) return;
+    const nm=f.properties.name;
+    try{
+      const mk=new Tmapv2.Marker({
+        position:new Tmapv2.LatLng(c[1],c[0]), map:tmap,
+        iconHTML:`<div class="maplbl">${nm.replace(/구$/,"")}</div>`
+      });
+      mk._dname=nm; tmapLabels.push(mk);
+    }catch(e){}
+  });
+  updateLabelVis();
+}
+function updateLabelVis(){
+  if(!tmap || !tmapLabels.length) return;
+  let z=11; try{ z=tmap.getZoom(); }catch(e){}
+  const show=z>=11;
+  tmapLabels.forEach(m=>{ try{ m.setMap(show?tmap:null); }catch(e){} });
+}
+
+/* ---------- 재분류 적용 ---------- */
+function applyMethod(m){
+  state.method=m; state.breaks=computeBreaks();
+  renderLegend(); renderRank();
+  if(tmap) recolorTmap(); else recolorSVG();
+}
+
+/* ============================================================
+   부트스트랩
+   ============================================================ */
+function showBanner(msg){ const b=document.getElementById("banner"); b.textContent=msg; b.style.display="block"; }
+// SDK는 head에서 동기 로드됨. 여기선 준비 여부만 확인.
+const tmapReady = () => (typeof Tmapv2!=="undefined") && Tmapv2.Map && Tmapv2.LatLng && Tmapv2.Polygon;
+function fallbackSVG(msg){ document.getElementById("map").style.display="none"; showBanner(msg); renderSVG(); }
+
+async function boot(){
+  try{
+    const [geo,votes]=await Promise.all([
+      fetch("data/seoul_municipalities.geojson").then(r=>r.json()),
+      fetch("data/votes.json").then(r=>r.json())
+    ]);
+    state.geo=geo; state.votes=votes;
+    Object.values(votes.votes).forEach(d=>state.byName[d.name]=d);
+    state.margins=Object.values(votes.votes).map(d=>d.margin_pct);
+    state.breaks=computeBreaks();
+    buildRanks();
+    renderTotals(); renderLegend(); renderRank();
+  }catch(err){
+    document.getElementById("totals").textContent="데이터 로드 실패 — http 서버로 실행했는지 확인하세요 (python -m http.server 5500).";
+    showBanner("⚠ data/ 로드 실패: 로컬 http 서버에서 열어주세요."); console.error(err); return;
+  }
+
+  // 분류법 토글
+  document.querySelectorAll("#seg button").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#seg button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active"); applyMethod(btn.dataset.m);
+    });
+  });
+
+  // 패널 닫기 / 랭킹 접기 / ESC
+  document.getElementById("pClose").addEventListener("click",closePanel);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePanel(); });
+  const rankTg=document.getElementById("rankTg");
+  rankTg.addEventListener("click",()=>{
+    const r=document.getElementById("rank"); r.classList.toggle("collapsed");
+    rankTg.textContent=r.classList.contains("collapsed")?"펼치기 ▼":"접기 ▲";
+  });
+
+  if(!TMAP_APP_KEY || !TMAP_APP_KEY.trim()){
+    fallbackSVG("ℹ AppKey 미입력 — SVG 미리보기 모드 (키 입력 시 TMAP 지도 위에 렌더링)");
+  }else if(!tmapReady()){
+    fallbackSVG("⚠ TMAP SDK 로드 실패 — AppKey·도메인(IP 허용) 설정을 확인하세요. 아래는 SVG 미리보기.");
+  }else{
+    try{ initTmap(); }
+    catch(e){ console.error(e); fallbackSVG("⚠ TMAP 초기화 실패 — 콘솔 확인. 아래는 SVG 미리보기."); }
+  }
+}
+// 인트로 스플래시 제거 (애니메이션 종료 후 DOM에서 제외해 클릭 막힘 방지)
+(function(){
+  const s=document.getElementById("splash"); if(!s) return;
+  const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  setTimeout(()=>s.classList.add("done"), reduce?500:1900);
+})();
+
+boot();
+</script>
+</body>
+</html>

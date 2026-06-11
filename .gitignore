@@ -1,0 +1,11 @@
+# 개인 과제 보고서 (공개 제외)
+*.docx
+# 백업/스캐폴딩
+index_stable.html
+shot.js
+hero.js
+verify.js
+# 의존성/패키지
+node_modules/
+package.json
+package-lock.json
