@@ -196,20 +196,52 @@
   .r-row .r-bar{position:absolute;top:0;height:100%;border-radius:5px}
   .r-row .r-val{font-size:9.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 
-  /* ---- 인트로 스플래시 ---- */
-  #splash{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-    background:radial-gradient(circle at 50% 42%,#1a2740,#0c1422 80%);color:#fff;
-    animation:splashOut .5s ease 1.2s forwards}
-  #splash .sp-t{font-size:30px;font-weight:800;letter-spacing:-.8px;opacity:0;transform:translateY(10px);animation:spIn .55s cubic-bezier(.22,.61,.36,1) .12s forwards}
-  #splash .sp-s{font-size:14px;color:#9cafca;opacity:0;animation:spIn .55s ease .32s forwards}
-  #splash .sp-dots{display:flex;gap:8px;margin-top:4px;opacity:0;animation:spIn .5s ease .5s forwards}
-  #splash .sp-dots i{width:11px;height:11px;border-radius:50%}
+  /* ---- 인트로: 후보 프로필 VS 카드 (이미지 미사용, 전부 CSS/타이포) ---- */
+  #intro{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 36%,#1b2942,#0a111e 86%);color:#fff;padding:26px;overflow-y:auto;
+    animation:introIn .45s ease both}
+  #intro.done{display:none}
+  #intro .iv-head{text-align:center;margin-bottom:20px;opacity:0;animation:spIn .5s ease .05s forwards}
+  #intro .iv-head .ih-t{font-size:14.5px;font-weight:700;color:#9cafca;letter-spacing:.2px}
+  #intro .iv-head .ih-s{font-size:12px;color:#6f81a0;margin-top:3px}
+  #intro .iv-wrap{display:flex;align-items:stretch;gap:0;max-width:900px;width:100%}
+  #intro .iv-card{flex:1;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1);border-radius:18px;
+    padding:24px 24px 22px;display:flex;flex-direction:column;opacity:0;transform:translateY(12px)}
+  #intro .iv-card.left{animation:spIn .55s cubic-bezier(.22,.61,.36,1) .18s forwards}
+  #intro .iv-card.right{animation:spIn .55s cubic-bezier(.22,.61,.36,1) .32s forwards}
+  #intro .iv-card.win{border-color:rgba(230,30,43,.45);background:rgba(230,30,43,.07)}
+  #intro .mono{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:29px;font-weight:800;color:#fff;margin-bottom:11px;box-shadow:0 4px 16px rgba(0,0,0,.32)}
+  #intro .mono.dem{background:linear-gradient(135deg,#2f40a8,#152484)}
+  #intro .mono.ppp{background:linear-gradient(135deg,#f0454f,#E61E2B)}
+  #intro .iv-name{font-size:28px;font-weight:800;letter-spacing:-.7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  #intro .iv-meta{font-size:12.5px;color:#aab8d0;margin-top:8px;line-height:1.5}
+  #intro .iv-career{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-direction:column;gap:5px}
+  #intro .iv-career li{font-size:12.5px;color:#d7e0ef;padding-left:14px;position:relative;line-height:1.45}
+  #intro .iv-career li::before{content:"";position:absolute;left:0;top:6px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5}
+  #intro .iv-result{margin-top:16px;padding-top:13px;border-top:1px solid rgba(255,255,255,.12);font-size:20px;font-weight:800;letter-spacing:-.3px}
+  #intro .iv-result .ir-sub{display:block;font-size:11.5px;font-weight:600;color:#9cafca;margin-top:3px;letter-spacing:0}
+  #intro .iv-vs{display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;font-style:italic;
+    color:#fff;padding:0 16px;flex:none;text-shadow:0 2px 14px rgba(0,0,0,.45);opacity:0;animation:spIn .4s ease .48s forwards}
+  #intro .iv-primary{margin-top:11px;font-size:11px;color:#8ea0bd;line-height:1.42}
+  #intro .iv-primary b{color:#c2cee0;font-weight:700}
+  #intro .iv-go{margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:9px;opacity:0;animation:spIn .5s ease .68s forwards}
+  #intro .iv-go button{font-family:inherit;font-size:14px;font-weight:800;color:#10182b;background:#fff;border:none;
+    border-radius:12px;padding:11px 28px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.28);transition:transform .12s}
+  #intro .iv-go button:hover{transform:translateY(-2px)}
+  #intro .iv-go .ig-hint{font-size:11px;color:#6f81a0}
+  .iv-chip{font-size:10.5px;font-weight:800;color:#fff;padding:2px 8px;border-radius:6px;letter-spacing:-.2px}
+  .iv-chip.dem{background:#152484}.iv-chip.ppp{background:#E61E2B}
+  .iv-badge-win{font-size:11px;font-weight:800;color:#fff;background:#E61E2B;border-radius:6px;padding:2px 9px}
   @keyframes spIn{to{opacity:1;transform:none}}
-  @keyframes splashOut{to{opacity:0;visibility:hidden}}
-  #splash.done{display:none}
+  @keyframes introIn{from{opacity:0}to{opacity:1}}
+  @media(max-width:480px){
+    #intro .iv-wrap{flex-direction:column;gap:12px}
+    #intro .iv-vs{padding:2px 0;font-size:23px}
+    #intro .iv-name{font-size:23px} #intro .iv-result{font-size:18px}
+  }
   @media(prefers-reduced-motion:reduce){
-    #splash{animation:splashOut .01s ease .35s forwards}
-    #splash .sp-t,#splash .sp-s,#splash .sp-dots{animation-duration:.01s}
+    #intro,#intro *{animation-duration:.01s !important}
     .p-cand .pc-fill,#panel{transition:none}
   }
 </style>
@@ -292,10 +324,42 @@
   </div>
 </div>
 
-<div id="splash" aria-hidden="true">
-  <div class="sp-dots"><i style="background:#d8694e"></i><i style="background:#4f8bc0"></i></div>
-  <div class="sp-t">2026 서울시장 선거</div>
-  <div class="sp-s">누가 어디서 이겼나 — 자치구별 단계구분도</div>
+<div id="intro">
+  <div class="iv-head">
+    <div class="ih-t">2026 제9회 지방선거 · 서울특별시장</div>
+    <div class="ih-s">누가 어디서 이겼나</div>
+  </div>
+  <div class="iv-wrap">
+    <div class="iv-card left">
+      <div class="mono dem">정</div>
+      <div class="iv-name">정원오 <span class="iv-chip dem">더불어민주당</span></div>
+      <div class="iv-meta">만 57세 · 서울시립대 경제학과</div>
+      <ul class="iv-career">
+        <li>성동구청장 3선 (민선 6·7·8기)</li>
+        <li>서울 유일의 3선 연임 구청장</li>
+        <li>더불어민주당 서울시장 후보</li>
+      </ul>
+      <div class="iv-result">48.07%<span class="ir-sub">2,515,560표 · 15개 구 우세</span></div>
+      <div class="iv-primary">당내 경선 — <b>박주민·전현희</b> 제치고 본선 진출</div>
+    </div>
+    <div class="iv-vs">VS</div>
+    <div class="iv-card right win">
+      <div class="mono ppp">오</div>
+      <div class="iv-name">오세훈 <span class="iv-chip ppp">국민의힘</span> <span class="iv-badge-win">당선</span></div>
+      <div class="iv-meta">만 65세 · 고려대 법학 학사·석사·박사</div>
+      <ul class="iv-career">
+        <li>변호사 (제26회 사법시험)</li>
+        <li>제16대 국회의원</li>
+        <li>서울특별시장 5선</li>
+      </ul>
+      <div class="iv-result">49.22%<span class="ir-sub">2,575,819표 · 10개 구 우세</span></div>
+      <div class="iv-primary">당내 경선 — <b>박수민·윤희숙</b> 제치고 본선 진출</div>
+    </div>
+  </div>
+  <div class="iv-go">
+    <button id="introGo">지도 보기 →</button>
+    <span class="ig-hint">아무 키나 누르거나 화면을 클릭하면 시작 · 8초 후 자동 진입</span>
+  </div>
 </div>
 
 <div id="tip"></div>
@@ -816,11 +880,27 @@ async function boot(){
     catch(e){ console.error(e); fallbackSVG("⚠ TMAP 초기화 실패 — 콘솔 확인. 아래는 SVG 미리보기."); }
   }
 }
-// 인트로 스플래시 제거 (애니메이션 종료 후 DOM에서 제외해 클릭 막힘 방지)
+// 인트로 VS 카드: 클릭/키 입력/8초 자동 진입, 세션 내 재방문 시 스킵
 (function(){
-  const s=document.getElementById("splash"); if(!s) return;
-  const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-  setTimeout(()=>s.classList.add("done"), reduce?500:1900);
+  const intro=document.getElementById("intro"); if(!intro) return;
+  try{ if(sessionStorage.getItem("introSeen")){ intro.classList.add("done"); return; } }catch(e){}
+  let done=false, timer=null;
+  function dismiss(){
+    if(done) return; done=true;
+    try{ sessionStorage.setItem("introSeen","1"); }catch(e){}
+    document.removeEventListener("keydown",onKey);
+    intro.removeEventListener("click",onClick);
+    if(timer) clearTimeout(timer);
+    intro.style.transition="opacity .4s ease"; intro.style.opacity="0";
+    setTimeout(()=>intro.classList.add("done"), 420);
+  }
+  function onKey(){ dismiss(); }
+  function onClick(){ dismiss(); }
+  const goBtn=document.getElementById("introGo");
+  if(goBtn) goBtn.addEventListener("click",e=>{ e.stopPropagation(); dismiss(); });
+  intro.addEventListener("click",onClick);
+  document.addEventListener("keydown",onKey);
+  timer=setTimeout(dismiss, 8000); // 방치 대비 자동 진입
 })();
 
 boot();
